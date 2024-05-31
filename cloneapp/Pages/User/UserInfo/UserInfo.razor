@@ -1,0 +1,103 @@
+﻿@page "/User/UserInfo"
+
+@inherits OwningComponentBase<UserManager<IdentityUser>>
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Data.DataContext _dataContext
+
+@code
+{
+	public UserManager<IdentityUser> _userManager => Service;
+	public IdentityUser identity;
+	public IList<string> roles;
+
+	public List<Article> articles;
+	public string userInfo;
+
+	public string userName;
+
+	protected async override Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		if (user.Identity!.IsAuthenticated)
+		{
+			userName = user.Identity.Name;
+			identity = await _userManager.FindByNameAsync(userName);
+			roles = await _userManager.GetRolesAsync(identity);
+
+			articles = _dataContext.Articles.Where(article => article.UserId == identity.Id).ToList();
+			userInfo = _dataContext.UserInfos.Where(info => info.UserId == identity.Id).FirstOrDefault().Information;
+		}
+	}
+}
+
+@functions{
+	string ArticleLinkText(Article article)
+	{
+		return "/GetArticle?articleId=" + article.ArticleId;
+	}
+}
+
+<script>
+	var src = document.getElementById("userImage").src;
+	var array = src.split("/");
+	var imageSource = "/" + array[3] + "/" + array[4];
+</script>
+
+<div class="col-1">
+	<NavLink class="d-block text-center text-decoration-none text-dark w-100 fs-6"
+			 style=""
+			 href="/User/UserInfo"
+			 ActiveClass="border-end border-success border-5"
+			 Match="NavLinkMatch.Prefix">
+		Info
+	</NavLink>
+	<NavLink class="d-block text-center text-decoration-none text-dark w-100 mt-4 fs-6"
+			 href="/User/Edit"
+			 ActiveClass="border-end border-success border-5"
+			 Match="NavLinkMatch.Prefix">
+		Edit
+	</NavLink>
+</div>
+
+<div class="col-5 ms-5">
+	<div class="row bg-success rounded text-white">
+		<div class="col-5">
+			<img id="userInfoImage" class="border border-2 border-white" style="top:-1rem; position:relative; width:9rem; height:10rem;" />
+			<script>
+				document.getElementById("userInfoImage").src = imageSource;
+			</script>
+		</div>
+		<div class="col-5" style="left:-3rem; position:relative;">
+			@if (identity != null)
+			{
+				<div class="mt-2">
+					<h4 class="">@identity.UserName</h4>
+					<h6 class="fw-light">@roles[0]</h6>
+					<h6>Approved Articles: 0</h6>
+				</div>
+			}
+		</div>
+	</div>
+	<div class="row bg-info rounded">
+		<h2 class="text-white mt-2">articles</h2>
+		<ul class="list-group p-0 text-white">
+			@if(articles != null)
+			{
+				@foreach (var item in articles)
+				{
+					<li class="list-group-item list-group-item-info">
+						<a  class="text-decoration-none" href=@ArticleLinkText(item)>
+							@item.Title
+						</a>
+					</li>
+				}
+			}
+		</ul>
+	</div>
+	<div class="row bg-light">
+		<h2 class="mt-2">about</h2>
+		<p>@userInfo</p>
+	</div>
+</div>

@@ -1,0 +1,288 @@
+﻿@page "/User/articleManagement"
+
+@using Microsoft.JSInterop;
+
+@inject Data.DataContext _dataContext
+@inject UserManager<IdentityUser> _userManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JsRuntime
+
+@code {
+	IdentityUser user;
+	string userName => AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Identity!.Name!;
+
+	List<Article> articles;
+	string unReleasedArticleTitle = "New Article";
+	List<Category> categories;
+
+	private DotNetObjectReference<ArticleManagement>? _objRef;
+
+	protected override async Task OnInitializedAsync()
+	{
+		user = await _userManager.FindByNameAsync(userName);
+		articles = _dataContext.Articles.ToList();
+		categories = _dataContext.Categories.ToList();
+	}
+
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		await BundleAndSendDotNetHelper();
+	}
+}
+
+@functions {
+	public async void CreateNewArticle()
+	{
+		Article unReleasedArticle = _dataContext.Articles.Where(article => article.isReleased == false && article.UserId == user.Id).FirstOrDefault()!;
+		if (unReleasedArticle != null)
+		{
+			await JsRuntime.InvokeAsync<object>("ShowErrorModal", new object());
+		}
+		else
+		{
+			Article article = new() { UserId = user.Id, isReleased = false };
+
+			_dataContext.Articles.Add(article);
+			_dataContext.SaveChanges();
+
+			articles = _dataContext.Articles.ToList();
+		}
+		StateHasChanged();
+	}
+
+	public void DeleteArticle(int articleId)
+	{
+		Article article = _dataContext.Articles.Where(article => article.ArticleId == articleId).FirstOrDefault()!;
+
+		var categories = _dataContext.ArticleCategories.Where(category => category.ArticleId == articleId).ToList();
+		_dataContext.ArticleCategories.RemoveRange(categories);
+		_dataContext.Articles.Remove(article);
+
+		_dataContext.SaveChanges();
+
+		articles = _dataContext.Articles.ToList();
+		StateHasChanged();
+	}
+
+	[JSInvokableAttribute("RenameArticleTitle")]
+	public void RenameArticleTitle(object[] bundle)
+	{
+		string newTitle = bundle[0].ToString()!;
+		string temp = bundle[1].ToString()!;
+		int index = Int32.Parse(temp);
+
+		articles[index].Title = newTitle;
+
+		_dataContext.Articles.Update(articles[index]);
+		_dataContext.SaveChanges();
+		articles = _dataContext.Articles.ToList();
+
+		StateHasChanged();
+	}
+
+	public void SetArticleRelease(Article article, char key)
+	{
+		if (key == 'r')
+		{
+			if (article.Title != null)
+			{
+				article.isReleased = true;
+				_dataContext.Articles.Update(article);
+			}
+		}
+		else
+		{
+			article.isReleased = false;
+			_dataContext.Articles.Update(article);
+		}
+		_dataContext.SaveChanges();
+		articles = _dataContext.Articles.ToList();
+
+		StateHasChanged();
+	}
+
+	[JSInvokableAttribute("SetArticleCategories")]
+	public void SetArticleCategories(string[] categories)
+	{	
+		int articleId = Convert.ToInt32(categories[categories.Length - 1]);
+
+		var list = _dataContext.ArticleCategories.Where(articleCategory => articleCategory.ArticleId == articleId).ToList();
+		_dataContext.ArticleCategories.RemoveRange(list);
+
+		List<ArticleCategory> articleCategories = new();
+		for (int i = 0; i < categories.Length - 1; i++)
+		{
+			articleCategories.Add(new ArticleCategory { ArticleId = articleId, CategoryName = categories[i] });
+		}
+
+		_dataContext.ArticleCategories.AddRange(articleCategories);
+		_dataContext.SaveChanges();
+
+		StateHasChanged();
+	}
+
+	public List<ArticleCategory> GetArticleCategories(Article article)
+	{
+		return _dataContext.ArticleCategories.Where(articleCategory => articleCategory.ArticleId == article.ArticleId).ToList();
+	}
+
+	public string EditArticleLinkText(int articleId)
+	{
+		return "/WriteArticle?articleId=" + articleId;
+	}
+
+	public string ArticleTitleText(string title)
+	{
+		return title != null ? title : "New Article";
+	}
+
+	public string isReleasedText(bool isReleased)
+	{
+		return isReleased == true ? "Released" : "Not Released";
+	}
+
+	private async Task BundleAndSendDotNetHelper()
+	{
+		_objRef = DotNetObjectReference.Create(this);
+		if (JsRuntime != null)
+		{
+			await JsRuntime.InvokeAsync<string>("SetDotNetObject", _objRef);
+			await JsRuntime.InvokeAsync<string>("SetRenameButtonsId", null);
+		}
+	}
+}
+
+<script>
+	var articleId = null;
+
+	function ShowErrorModal() {
+		$('#myModal').modal('show');
+	}
+
+	function SendCategories() {
+		var inputs = document.getElementsByTagName("input");
+		let categories = []
+
+		for (let i = 0; i < inputs.length; i++) {
+			if (inputs[i].type == "checkbox" && inputs[i].checked == true) {
+				categories.push(inputs[i].value);
+			}
+		}
+
+		if (categories != null) {
+			categories.push(articleId.toString());
+			window.dotNetHelper.invokeMethodAsync("SetArticleCategories", categories);
+		}
+
+		$('#categorySelectModal').modal('hide');
+	}
+
+	function SetArticleId(id) {
+		articleId = id;
+	}
+</script>
+
+<div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content ">
+			<div class="modal-header bg-danger">
+				<h5 class="modal-title" id="exampleModalLabel">Can not create new Article unless new one released</h5>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="categorySelectModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="categorySelectModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">All Categories</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				@if(categories != null)
+				{
+					@foreach (var item in categories)
+					{	
+						<div>
+							<input type="checkbox" id="@item.CategoryName" value="@item.CategoryName" />
+							<label for="@item.CategoryName">@item.CategoryName</label>
+						</div>
+					}
+				}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onclick="SendCategories()">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<h3>Articles</h3>
+	<div class="col-10">
+		@if (articles != null)
+		{
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Article</th>
+						<th>Settings</th>
+						<th>Category</th>
+						<th>Release State</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in articles)
+					{
+						<tr class="border-bottom">
+							<td class="fw-medium w-40">@ArticleTitleText(item.Title!)</td>
+							<td>
+								<button class="btn btn-danger" @onclick="() => DeleteArticle(item.ArticleId)">Delete</button>
+								<a href=@EditArticleLinkText(item.ArticleId) class="btn btn-warning">Edit</a>
+
+								<button type="button" class="btn btn-success" data-bs-container="body"
+										data-bs-toggle="popover" onclick="PopoverOnClick(this.id, 'RenameArticleTitle')"
+										data-bs-placement="bottom">
+									Rename
+								</button>
+
+								@if (item.isReleased)
+								{
+									<button @onclick="() => SetArticleRelease(item, 'u')" class="btn btn-info">Unrelease</button>
+								}
+								else
+								{
+									<button @onclick="() => SetArticleRelease(item, 'r')" class="btn btn-info">Release</button>
+								}
+								<button onclick="SetArticleId(@item.ArticleId)" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#categorySelectModal">
+									Set Categories
+								</button>
+							</td>
+							<td>
+								@{
+									var categories = GetArticleCategories(item);
+									string allCategories = "";
+								}
+								@foreach (var category in categories)
+								{
+									allCategories += category.CategoryName + " ";
+								}
+
+								<div class="badge bg-light text-wrap text-black" style="width: 7rem;">
+									@allCategories
+								</div>
+							</td>
+							<td class="">
+								@isReleasedText(item.isReleased)
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+</div>
+
+<button class="btn btn-primary w-25" @onclick="CreateNewArticle">New Article</button>

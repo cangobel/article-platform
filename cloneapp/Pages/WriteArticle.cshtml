@@ -1,0 +1,21 @@
+﻿@page
+@model cloneapp.Pages.WriteArticleModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+	
+}
+
+@Html.AntiForgeryToken()
+
+@section Stylesheets {
+	<link rel="stylesheet" href="/css/prism.css"/>
+}
+
+<div>
+	<textarea id="textArea"> </textarea>
+</div>
+
+@section Scripts {
+	<script src="https://cdn.tiny.cloud/1/grg6zh2muiebttnygnwmjvxesv0jfdey90xqpek7302swo81/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+	<script src="~/js/tinymce.js"></script>
+}

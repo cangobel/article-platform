@@ -1,0 +1,31 @@
+﻿body {
+}
+
+button{
+    
+}
+
+.slide-button {
+    position: absolute;
+    top: 4px;
+}
+
+.category-button{
+    height: 32px;
+}
+
+.category-button:focus {
+    border-bottom: solid 2px;
+}
+
+.slide-button-p {
+    background: linear-gradient(270deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 25%, rgba(255, 255, 255, 0.9) 50%, rgb(255, 255, 255) 75%);
+    left: -8px;
+    padding: 0 40px 2px 0px;
+}
+
+.slide-button-n {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 25%, rgba(255, 255, 255, 0.9) 50%, rgb(255, 255, 255) 75%);
+    right: -22px;
+    padding: 0 0 2px 40px;
+}

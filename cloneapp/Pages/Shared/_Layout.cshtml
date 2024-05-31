@@ -1,0 +1,102 @@
+﻿@using System.Security.Claims;
+@inject IHttpContextAccessor _httpContextAccessor;
+@inject DataContext _dataContext;
+
+@{
+	bool isLoggedIn = User.Identity.IsAuthenticated;
+	var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+	string imagePath = "";
+
+	if (isLoggedIn)
+	{
+		var userImage = _dataContext.UserImages.Where(image => image.UserId == userId).FirstOrDefault();
+		if (userImage != null)
+			imagePath = userImage.ImagePath;
+	}
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - cloneapp</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/cloneapp.styles.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+	@await RenderSectionAsync("Stylesheets", required: false)
+	<script src="https://kit.fontawesome.com/88c1d6f64d.js" crossorigin="anonymous"></script>
+</head>
+<body>
+	
+	<header>
+		<div style="" class="d-flex pt-2 pb-2 shadow">
+			<div class="ms-3">
+				<a style="" class="bg-light dark-link" asp-area="" asp-page="/Index">
+					<i class="fa-solid fa-quote-left fa-2xl"></i>
+					<i class="fa-solid fa-quote-right fa-2xl ms-2"></i>
+					<p class="m-0">cloneapp</p>
+				</a>
+			</div>
+			<div class="d-inline ms-5">
+				<svg style="top:1.15rem;" width="24" height="24" viewBox="0 0 24 24" class="position-absolute ms-2" fill="none">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M4.1 11.06a6.95 6.95 0 1 1 13.9 0 6.95 6.95 0 0 1-13.9 0zm6.94-8.05a8.05 8.05 0 1 0 5.13 14.26l3.75 3.75a.56.56 0 1 0 .8-.79l-3.74-3.73A8.05 8.05 0 0 0 11.04 3v.01z" fill="currentColor">
+					</path>
+				</svg>
+				<input style="" type="text" class="bg-light ps-5 rounded-pill outline-none border-none height-3" placeholder="Search">
+			</div>
+			<div class="ms-auto me-5 width-8">
+				<button id="userDropdownButton" class="d-block mt-2 styled-button ms-auto me-auto" onclick="userDropdownButtonClick()">
+					@if(isLoggedIn)
+					{
+						<img style="width:2rem; height:2.2rem;" class="border border-3 rounded-circle" src=@imagePath />
+					}
+					else
+					{
+						<img style="width:2rem; height:2.2rem;" class="border border-3 rounded-circle" src="/images/profile.jpg" />
+					}
+				</button>
+				<div id="userDropdown" class="mt-1 d-none dropdown width-8 shadow rounded-3 bg-light">
+					<ul class="list-unstyled">
+						@if (isLoggedIn)
+						{
+							<li class="d-block mt-2 ps-3 dropdown-list">
+								<i class="fa-solid fa-user"></i>
+								<a href="/User/UserInfo" class="dark-link">User Page</a>
+							</li>
+							<li class="d-block mt-2 ps-3">
+								<i class="fa-solid fa-right-from-bracket"></i>
+								<a asp-page="/Logout" class="dark-link">Logout</a>
+							</li>
+						}
+						else
+						{
+							<li class="d-block mt-2 ps-3">
+								<a asp-page="/Login" class="dark-link">Login</a>
+							</li>
+						}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</header>
+	<div class="container">
+		<main role="main">
+			
+			@RenderBody()
+		</main>
+	</div>
+
+	<footer class="border-top footer text-muted">
+		<div class="container">
+		</div>
+	</footer>
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

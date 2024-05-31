@@ -1,0 +1,82 @@
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+button{
+    margin-left:0.25rem;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  
+}
+
+a:hover{
+    color: black;
+}
+
+.mr-left-auto {
+    margin-left: auto;
+}
+
+.w-15{
+    width:15%;
+}
+
+.w-40{
+    width:40%;
+}
+
+.fw-medium{
+    font-weight:600;
+}
+
+.border-rad{
+    border-radius: 5%;
+}
+
+.outline-none{
+    outline: none;
+}
+
+.border-none{
+    border: none;
+}
+
+.height-3{
+    height: 2.8rem;
+}
+
+.dark-link{
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown{
+    position: absolute;
+    top: 64px;
+    font-size: .9rem;
+}
+
+.width-8{
+    width: 8rem;
+}
+
+.styled-button {
+    border: none;
+    appearance: none;
+    background-color: inherit;
+}
+
+.dropdown-list{
+    padding-bottom: .9rem;
+    border-bottom-style: solid;
+    border-width: 1px;
+    border-color: forestgreen;
+}

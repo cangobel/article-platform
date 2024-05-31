@@ -1,0 +1,54 @@
+﻿@using System.Security.Claims;
+
+@inherits LayoutComponentBase
+@inject UserManager<IdentityUser> _userManager;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@code{
+	ClaimsPrincipal userName => AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+	bool isAdmin = false;
+
+	protected override async Task OnInitializedAsync()
+	{	
+		IdentityUser user = await _userManager.GetUserAsync(userName);
+		IList<string> userRoles = await _userManager.GetRolesAsync(user);
+
+		isAdmin = userRoles.Contains("admin") ? true : false;
+	}
+
+}
+<div class="container-fluid">
+	<div class="d-flex justify-content-evenly mt-5 border-bottom">
+		<NavLink class="d-block text-center p-2 text-decoration-none rounded-top w-15 text-dark fw-medium"
+				 href="/User/UserInfo"
+				 ActiveClass="bg-success text-white"
+				 Match="NavLinkMatch.Prefix">
+			User Info
+		</NavLink>
+		@if(isAdmin)
+		{
+			<NavLink class="d-block text-center p-2 text-decoration-none rounded-top w-15 text-dark fw-medium"
+					 href="User/admin/roleManagement"
+					 ActiveClass="bg-success text-white"
+					 Match="NavLinkMatch.Prefix">
+				Role Management
+			</NavLink>
+			<NavLink class="d-block text-center p-2 text-decoration-none rounded-top w-15 text-dark fw-medium"
+					 href="User/admin/userManagement"
+					 ActiveClass="bg-success text-white"
+					 Match="NavLinkMatch.Prefix">
+				User Management
+			</NavLink>
+		}
+		<NavLink class="d-block text-center p-2 text-decoration-none rounded-top w-15 text-dark fw-medium"
+				 href="User/articleManagement"
+				 ActiveClass="bg-success text-white"
+				 Match="NavLinkMatch.Prefix">
+			Article Management
+		</NavLink>
+	</div>
+	<div class="row mt-5">
+		@Body
+	</div>
+
+</div>

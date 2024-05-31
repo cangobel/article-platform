@@ -1,0 +1,92 @@
+﻿@page "/User/admin/userManagement"
+
+@using Microsoft.JSInterop
+@using cloneapp.Data
+
+@inherits OwningComponentBase<UserManager<IdentityUser>>
+
+@code {
+	UserManager<IdentityUser> _userManager => Service;
+	private Type? selectedType;
+	private DotNetObjectReference<UserManagement>? _objRef;
+
+	[Inject]
+	private IJSRuntime? JsRuntime { get; set; }
+
+	public Dictionary<string, object> parameters = new();
+
+	protected override Task OnAfterRenderAsync(bool firstRender)
+	{
+		BundleAndSendDotNetHelper();
+		return base.OnAfterRenderAsync(firstRender);
+	}
+}
+
+@functions {
+
+	[JSInvokableAttribute("SearchUser")]
+	public async void SearchUser(string userName)
+	{
+		var user = await _userManager.FindByNameAsync(userName);
+
+		if (user != null)
+		{
+			selectedType = Type.GetType("cloneapp.Pages.Admin.UserCard");
+
+			parameters.TryAdd("userName", user.UserName);
+		}
+		else if (selectedType != null)
+		{
+			selectedType = null;
+		}
+		StateHasChanged();
+	}
+
+	private async Task BundleAndSendDotNetHelper()
+	{
+		_objRef = DotNetObjectReference.Create(this);
+		if (JsRuntime != null)
+		{
+			await JsRuntime.InvokeAsync<string>("SetDotNetObj", _objRef);
+		}
+	}
+}
+
+<script>
+
+	function SetDotNetObj(dotNetHelper) {
+		window.dotNetHelper = dotNetHelper;
+	}
+
+	function OnClickHandler() {
+		input = document.getElementById("searchInput").value;
+		window.dotNetHelper.invokeMethodAsync("SearchUser", input);
+	}
+
+</script>
+
+
+<div class="col-5">
+	<div class="input-group">
+		<h4 class="">Search and Select</h4>
+		<input id="searchInput" type="text" placeholder="Search User" class="border-1 rounded w-75" />
+		<button class="btn btn-success" onclick="OnClickHandler()">
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+				<path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+			</svg>
+		</button>
+	</div>
+
+	@if (selectedType != null)
+	{
+		<DynamicComponent Type="selectedType" Parameters="parameters" />
+	}
+</div>
+
+<div class="col-5">
+	COL5
+</div>
+
+<div class="mt-3">
+	<h4>Create User</h4>
+</div>

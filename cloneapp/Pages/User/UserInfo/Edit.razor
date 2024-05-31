@@ -1,0 +1,64 @@
+﻿@page "/User/Edit"
+
+@code {
+
+}
+
+<script>
+	function PreviewImage(event)
+	{	
+		const imageFiles = event.target.files;
+		const imageFilesLength = imageFiles.length;
+
+		if (imageFilesLength > 0) {
+			const imageSrc = URL.createObjectURL(imageFiles[0]);
+			const imagePreviewElement = document.querySelector("#preview-selected-image");
+
+			imagePreviewElement.src = imageSrc;
+			imagePreviewElement.style.display = "block";
+		}
+	}
+</script>
+
+<div class="col-1">
+	<NavLink class="d-block text-center text-decoration-none text-dark w-100 fs-6"
+			 style=""
+			 href="/User/userInfo"
+			 ActiveClass=""
+			 Match="NavLinkMatch.Prefix">
+		Info
+	</NavLink>
+	<NavLink class="d-block text-center text-decoration-none text-dark w-100 mt-4 fs-6"
+			 href="/User/edit"
+			 ActiveClass="border-end border-success border-5"
+			 Match="NavLinkMatch.Prefix">
+		Edit
+	</NavLink>
+</div>
+
+<div class="col-5 ms-5">
+	<h3 class="mb-5">Edit</h3>
+	<div class="row mb-5">
+		<div class="col-3" style="width:35%">
+			<img id="preview-selected-image" class="rounded" style="width:9rem; height:10rem;" src="/images/profile.jpg" />
+		</div>
+		<div class="col-5" style="width:65%">
+			<div class="input-group">
+				<input type="file" onchange="PreviewImage(event);" class="form-control" id="inputGroupFile02">
+				<button class="input-group-text">Upload</button>
+			</div>
+		</div>
+	</div>
+	<div class="input-group mb-3">
+		<input type="text" class="form-control" placeholder="User Name" />
+		<button class="input-group-text">Save</button>
+	</div>
+	<div class="input-group mb-3">
+		<input type="text" class="form-control" placeholder="E Mail" />
+		<button class="input-group-text">Save</button>
+	</div>
+	<div class="input-group mb-3">
+		<input type="text" class="form-control" placeholder="Phone Number" />
+		<button class="input-group-text">Save</button>
+	</div>
+</div>

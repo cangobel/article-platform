@@ -1,0 +1,117 @@
+﻿@page "/User/admin/roleManagement"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.JSInterop
+
+@inherits OwningComponentBase<RoleManager<IdentityRole>>
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@code {
+	public class ModelClass
+	{
+		public string roleName { get; set; }
+	}
+
+	public ModelClass roleModel { get; set; }
+	private DotNetObjectReference<RoleManagement>? _objRef;
+
+	[Inject]
+	private IJSRuntime? JsRuntime { get; set; }
+
+	public RoleManager<IdentityRole> _roleManager => Service;
+	public List<IdentityRole> roleList;
+
+	protected async override Task OnInitializedAsync()
+	{
+		roleModel = new();
+		roleList = _roleManager.Roles.ToList();
+	}
+
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		BundleAndSendDotNetHelper();
+	}
+}
+
+@functions {
+	public async void DeleteRole(string roleName)
+	{
+		IdentityRole role = _roleManager.Roles.Where(role => role.Name == roleName).FirstOrDefault()!;
+		var result = await _roleManager.DeleteAsync(role);
+		roleList = _roleManager.Roles.ToList();
+
+		StateHasChanged();
+	}
+
+	public async void AddRole()
+	{
+		IdentityRole role = new(roleModel.roleName);
+		var result = await _roleManager.CreateAsync(role);
+		roleList = _roleManager.Roles.ToList();
+
+		StateHasChanged();
+	}
+
+	[JSInvokableAttribute("EditRoleName")]
+	public async void EditRoleName(object[] bundle)
+	{
+		string newRoleName = bundle[0].ToString()!;
+		string temp = bundle[1].ToString()!;
+		int index = Int32.Parse(temp);
+
+		var resultSetName = await _roleManager.SetRoleNameAsync(roleList[index], newRoleName);
+		var resultUpdate = await _roleManager.UpdateAsync(roleList[index]);
+
+		roleList = _roleManager.Roles.ToList();
+
+		StateHasChanged();
+	}
+
+	private async Task BundleAndSendDotNetHelper()
+	{
+		_objRef = DotNetObjectReference.Create(this);
+		if (JsRuntime != null)
+		{	
+			await JsRuntime.InvokeAsync<string>("SetDotNetObject", _objRef);
+			await JsRuntime.InvokeAsync<string>("SetRenameButtonsId", _objRef);
+		}
+	}
+}
+
+
+<div class="row">
+	<div class="col-5">
+		<h3>Roles</h3>
+		<table class="table table-light table-borderless">
+			<tbody>
+				@foreach (var item in roleList)
+				{
+					<tr class="border-bottom">
+						<td class="fw-medium">@item.Name</td>
+						<td class="w-50">
+							<button class="btn btn-danger" @onclick="() => DeleteRole(item.Name)">
+								Delete
+							</button>
+							<button type="button" class="btn btn-success" data-bs-container="body"
+									onclick="PopoverOnClick(this.id, 'EditRoleName')" data-bs-toggle="popover"
+									data-bs-placement="right">
+								Rename
+							</button>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	<div class="row">
+		<h5>Add Role</h5>
+		@if (roleModel != null)
+		{
+			<EditForm Model="@roleModel">
+				<label for="FirstName">Role name:</label>
+				<InputText id="FirstName" @bind-Value="@roleModel.roleName" class="h-100" />
+				<input @onclick="@AddRole" type="submit" value="Add" class="btn btn-primary h-100" />
+			</EditForm>
+		}
+	</div>
+</div>
