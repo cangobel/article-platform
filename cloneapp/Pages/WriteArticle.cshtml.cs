@@ -21,7 +21,7 @@ public class WriteArticleModel : PageModel
 
 	public WriteArticleModel(DataContext dbContext, UserManager<IdentityUser> userManager, IWebHostEnvironment environment)
 	{
-        this._dbContext = dbContext;
+		this._dbContext = dbContext;
 		_userManager = userManager;
 		_environment = environment;
 	}
@@ -84,4 +84,19 @@ public class WriteArticleModel : PageModel
 			return BadRequest(new { message = ex.Message });
 		}
 	}
+
+	public IActionResult OnPostGetArticle(int articleId)
+	{	
+		Article article = _dbContext.Articles.Where(article => article.ArticleId == articleId).FirstOrDefault()!;
+		object result;
+		if (article != null)
+		{
+            result = new { content = article.Content, title = article.Title };
+		}
+		else
+		{
+			result = new();
+		}
+		return new JsonResult(result);
+    }
 }

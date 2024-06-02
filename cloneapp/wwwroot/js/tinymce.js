@@ -1,14 +1,14 @@
-var articleId;
+var ArticleId;
 
-function setDotNetArticleId(id) {
-	articleId = id;
+function setArticleId(id) {
+	ArticleId = id;
 }
 
 function initTinyMce() {
 	var keyFirstComponent = "tinymce-autosave-/WriteArticle?articleId=";
-	var keyLastComponent = "-textArea-draft";
+	var keyContentLastComponent = "-textArea-draft";
 
-	var contentKey = keyFirstComponent + articleId + keyLastComponent;
+	var contentKey = keyFirstComponent + ArticleId + keyContentLastComponent;
 
 	var entireHeight = document.getElementsByTagName("html")[0].clientHeight;
 
@@ -24,7 +24,7 @@ function initTinyMce() {
 			{ value: 'Email', title: 'Email' },
 		],
 		height: entireHeight,
-		autosave_interval: '3s',
+		autosave_interval: '10s',
 		save_onsavecallback: function () {
 			let content = tinymce.activeEditor.getContent();
 			content = ReplaceCharacters(content);
@@ -39,19 +39,16 @@ function initTinyMce() {
 				$.ajax({
 					type: "POST",
 					url: "/WriteArticle?handler=SaveArticle",
-					data: { "title": title, "content": content, "articleId": articleId },
+					data: { "title": title, "content": content, "articleId": ArticleId },
 					contentType: "application/x-www-form-urlencoded;charset=utf-8",
 					beforeSend: function (xhr) {
 						xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
 					},
 					success: function (response) {
-						alert("Hello: " + response.Name)
 					},
 					failure: function (response) {
-						alert("failure" + response.responseText)
 					},
 					error: function (response) {
-						alert("error" + response.responseText)
 					}
 				});
 			}
@@ -67,6 +64,24 @@ function initTinyMce() {
 				var content = localStorage.getItem(contentKey)
 				if (content != null) {
 					editor.setContent(content);
+				}
+				else {
+					$.ajax({
+						type: "POST",
+						url: "/WriteArticle?handler=GetArticle",
+						data: { "articleId": ArticleId },
+						contentType: "application/x-www-form-urlencoded;charset=utf-8",
+						beforeSend: function (xhr) {
+							xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+						},
+						success: function (response) {
+							editor.setContent(response.content);
+						},
+						failure: function (response) {
+						},
+						error: function (response) {
+						}
+					});
 				}
 			});
 		}
