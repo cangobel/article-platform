@@ -69,7 +69,7 @@ csharp_style_prefer_primary_constructors = true:suggestion
 csharp_style_conditional_delegate_call = true:suggestion
 csharp_space_around_binary_operators = before_and_after
 csharp_indent_labels = one_less_than_current
-csharp_indent_braces = true
+csharp_indent_braces = false
 
 [*.vb]
 #### Adlandırma stilleri ####

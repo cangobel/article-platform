@@ -9,8 +9,8 @@ public class Article
 	[Column("ArticleId")]
 	public int ArticleId { get; set; }
 
-	[Column("UserId")]
-	public string UserId { get; set; }
+	[Column("UserName")]
+	public string UserName { get; set; }
 
 	[Column("Title")]
 	public string? Title { get; set; }

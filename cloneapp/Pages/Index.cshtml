@@ -10,33 +10,111 @@
 	<link rel="stylesheet" href="~/css/index.css" />
 }
 
-<div class="row">
-	<div class="mt-5" style="position:relative; max-width: 680px; ">
-		<div id="slideContainer" class="d-flex" style="overflow-x: scroll; scrollbar-width: none;">
-			<button class="styled-button category-button ms-4">Explore</button>
-			@foreach (var category in Model.categories)
+@Html.AntiForgeryToken()
+
+<div class="col-6">
+	<div class="row">
+		<div class="mt-5" style="position:relative; max-width: 680px;">
+			<div id="slide-container" class="d-flex" style="overflow-x: scroll; scrollbar-width: none;">
+				<button onclick="getCategoryContent(this)" id="Explore" class="styled-button category-button ms-4">Explore</button>
+				@foreach (var category in Model.categories)
+				{
+					<button onclick="getCategoryContent(this)" id=@category.CategoryName class="styled-button category-button ms-4">@category.CategoryName</button>
+				}
+			</div>
+			<button class="styled-button slide-button slide-button-p" onclick="prevButtonOnClick()">
+				<i class="fa-solid fa-chevron-left"></i>
+			</button>
+			<button class="styled-button slide-button slide-button-n" onclick="nextButtonOnClick()">
+				<i class="fa-solid fa-chevron-right"></i>
+			</button>
+		</div>
+	</div>
+
+	<div class="row">
+		<div id="content-container" class="mt-5">
+			@foreach (var item in Model.articleProps)
 			{
-				<button class="styled-button category-button ms-4">@category.CategoryName</button>
+				<div class="mt-4 rounded pb-2" style="box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);">
+					<div class="d-flex">
+						<img class="mt-4 ms-2" style="width:200px; height:150px;" />
+						<div class="wdt-max-400 ms-3">
+							<a class="dark-link ms-3" href=@Model.ArticleLink(item.ArticleId)>
+								<h3 class="m-0">@item.Title</h3>
+							</a>
+							<p class="overflow-hdn dots mt-2">
+								ABCDEFASDFASDFASDFASERFIOAJSDİLKFAEİROFIASDLKCNAİEORADLFVNADSŞLKNMVZEOĞİDRIANDŞLFKVNAŞDSJFGA
+								SDFİALKSFNDİALERFAODFNİVAEİORUADFLJKVN
+							</p>
+						</div>
+					</div>
+					<div class="d-flex flex-row-reverse me-3">
+						<span class="">written by: @item.UserName</span>
+						<span class="me-3">@item.Category</span>
+					</div>
+				</div>
 			}
 		</div>
-		<button class="styled-button slide-button slide-button-p" onclick="prevButtonOnClick()">
-			<i class="fa-solid fa-chevron-left"></i>
-		</button>
-		<button class="styled-button slide-button slide-button-n" onclick="nextButtonOnClick()">
-			<i class="fa-solid fa-chevron-right"></i>
-		</button>
 	</div>
-	<div class="col"></div>
 </div>
 
 <script>
-	var container = document.getElementById("slideContainer");
+	var slide_container = document.getElementById("slideContainer");
+	var content_container = document.getElementById("content-container");
 
+	function articleCard(props){
+		return `<div class="mt-4 rounded pb-2" style="box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);">
+					<div class="d-flex">
+						<img class="mt-4 ms-2" style="width:200px; height:150px;" />
+						<div class="wdt-max-400 ms-3">
+								<a class="dark-link ms-3" href=/GetArticle?articleId=${props.articleId}>
+									<h3 class="m-0">${props.title}</h3>
+							</a>
+							<p class="overflow-hdn dots mt-2">
+								ABCDEFASDFASDFASDFASERFIOAJSDİLKFAEİROFIASDLKCNAİEORADLFVNADSŞLKNMVZEOĞİDRIANDŞLFKVNAŞDSJFGA
+								SDFİALKSFNDİALERFAODFNİVAEİORUADFLJKVN
+							</p>
+						</div>
+					</div>
+					<div class="d-flex flex-row-reverse me-3">
+							<span class="">written by: ${props.userName}</span>
+							<span class="me-3">${props.category}</span>
+					</div>
+				</div>`;
+	}						
+
+	function getCategoryContent(button) {
+		$.ajax(
+			{
+				type:'POST',
+				url:'/Index?handler=CategoryArticles',
+				data: { category: button.id },
+				contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader('XSRF-TOKEN', $('input:hidden[name="__RequestVerificationToken"]').val());
+				},
+				success: function(response){
+					var contents = "";
+					var responseContent = response.content;
+
+					for(let i in response.content){
+						contents += articleCard(responseContent[i]);
+					}
+
+					content_container.innerHTML = contents;
+				},
+				failure: function(response){
+					console.log(response);
+				}
+			}
+		)
+	}
+	
 	function prevButtonOnClick() {
-		container.scrollLeft -= 70;
+		slide_container.scrollLeft -= 70;
 	}
 
 	function nextButtonOnClick() {
-		container.scrollLeft += 70;
+		slide_container.scrollLeft += 70;
 	}
 </script>

@@ -49,8 +49,7 @@ public class WriteArticleModel : PageModel
 
 	public IActionResult OnPostSaveArticle(string title, string content, int articleId)
 	{
-		var userId = _userManager.FindByNameAsync(userName).Result.Id;
-		Article article = _dbContext.Articles.Where(article => article.ArticleId == articleId && article.UserId == userId).FirstOrDefault();
+		Article article = _dbContext.Articles.Where(article => article.ArticleId == articleId && article.UserName == userName).FirstOrDefault();
 
 		if (article != null)
 		{

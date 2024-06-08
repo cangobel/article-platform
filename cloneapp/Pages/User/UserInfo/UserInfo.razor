@@ -26,7 +26,7 @@
 			identity = await _userManager.FindByNameAsync(userName);
 			roles = await _userManager.GetRolesAsync(identity);
 
-			articles = _dataContext.Articles.Where(article => article.UserId == identity.Id).ToList();
+			articles = _dataContext.Articles.Where(article => article.UserName == userName).ToList();
 			userInfo = _dataContext.UserInfos.Where(info => info.UserId == identity.Id).FirstOrDefault().Information;
 		}
 	}

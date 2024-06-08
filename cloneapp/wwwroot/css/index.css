@@ -29,3 +29,15 @@ button{
     right: -22px;
     padding: 0 0 2px 40px;
 }
+
+.dots {
+    text-overflow: ellipsis;
+}
+
+.wdt-max-400 {
+    max-width: 400px;
+}
+
+.overflow-hdn{
+    overflow: hidden;
+}

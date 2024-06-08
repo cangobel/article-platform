@@ -33,14 +33,14 @@
 @functions {
 	public async void CreateNewArticle()
 	{
-		Article unReleasedArticle = _dataContext.Articles.Where(article => article.isReleased == false && article.UserId == user.Id).FirstOrDefault()!;
+		Article unReleasedArticle = _dataContext.Articles.Where(article => article.isReleased == false && article.UserName == user.UserName).FirstOrDefault()!;
 		if (unReleasedArticle != null)
 		{
 			await JsRuntime.InvokeAsync<object>("ShowErrorModal", new object());
 		}
 		else
 		{
-			Article article = new() { UserId = user.Id, isReleased = false };
+			Article article = new() { UserName = user.UserName, isReleased = false };
 
 			_dataContext.Articles.Add(article);
 			_dataContext.SaveChanges();
