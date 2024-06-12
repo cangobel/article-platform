@@ -21,3 +21,18 @@ function userDropdownButtonClick() {
         dropdown.classList.remove("d-none");
     }
 }
+
+//only sends one data
+function ajaxRequest(xhr, type, handler, data) {
+    
+    if (type == 'POST') {
+        xhr.open(type, handler, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader('XSRF-TOKEN', $('input:hidden[name="__RequestVerificationToken"]').val());
+        xhr.send(data.varName + '=' + data.value);
+    }
+    else {
+        xhr.open(type, handler + '&' + data.varName + '=' + data.value, true);
+        xhr.send();
+    }
+}

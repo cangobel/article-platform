@@ -59,7 +59,7 @@
 </div>
 
 <script>
-	var slide_container = document.getElementById("slideContainer");
+	var slide_container = document.getElementById("slide-container");
 	var content_container = document.getElementById("content-container");
 
 	function articleCard(props){
@@ -67,8 +67,8 @@
 					<div class="d-flex">
 						<img class="mt-4 ms-2" style="width:200px; height:150px;" />
 						<div class="wdt-max-400 ms-3">
-								<a class="dark-link ms-3" href=/GetArticle?articleId=${props.articleId}>
-									<h3 class="m-0">${props.title}</h3>
+							<a class="dark-link ms-3" href=/GetArticle?articleId=${props.articleId}>
+								<h3 class="m-0">${props.title}</h3>
 							</a>
 							<p class="overflow-hdn dots mt-2">
 								ABCDEFASDFASDFASDFASERFIOAJSDİLKFAEİROFIASDLKCNAİEORADLFVNADSŞLKNMVZEOĞİDRIANDŞLFKVNAŞDSJFGA
@@ -77,39 +77,35 @@
 						</div>
 					</div>
 					<div class="d-flex flex-row-reverse me-3">
-							<span class="">written by: ${props.userName}</span>
-							<span class="me-3">${props.category}</span>
+						<span class="">written by: ${props.userName}</span>
+						<span class="me-3">${props.category}</span>
 					</div>
 				</div>`;
-	}						
+	}
 
-	function getCategoryContent(button) {
-		$.ajax(
-			{
-				type:'POST',
-				url:'/Index?handler=CategoryArticles',
-				data: { category: button.id },
-				contentType: 'application/x-www-form-urlencoded;charset=utf-8',
-				beforeSend: function (xhr) {
-					xhr.setRequestHeader('XSRF-TOKEN', $('input:hidden[name="__RequestVerificationToken"]').val());
-				},
-				success: function(response){
-					var contents = "";
-					var responseContent = response.content;
+	var xhr = new XMLHttpRequest();
+	xhr.onloadend = (e) => {
+		var json = JSON.parse(e.target.response);
+		var components = "";
 
-					for(let i in response.content){
-						contents += articleCard(responseContent[i]);
-					}
+		json.contents.forEach((value) => {
+			components += articleCard(value);
+		});
 
-					content_container.innerHTML = contents;
-				},
-				failure: function(response){
-					console.log(response);
-				}
-			}
-		)
+		content_container.innerHTML = components;
 	}
 	
+	function getCategoryContent(button) {
+
+		if (!content_map.has(button.id)) {
+			ajaxRequest(xhr, 'GET', '/Index?handler=CategoryArticles', { varName: 'category', value: button.id });
+		}
+		else {
+			contents = content_map.get(button.id);
+			content_container.innerHTML = contents;
+		}
+	}
+
 	function prevButtonOnClick() {
 		slide_container.scrollLeft -= 70;
 	}
