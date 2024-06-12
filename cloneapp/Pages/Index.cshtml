@@ -62,8 +62,21 @@
 	var slide_container = document.getElementById("slide-container");
 	var content_container = document.getElementById("content-container");
 
-	function articleCard(props){
-		return `<div class="mt-4 rounded pb-2" style="box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);">
+	var content_map = new Map();
+	content_map.set('Explore', content_container.innerHTML);
+
+	var totalScrollHeight = document.body.scrollHeight;
+
+	window.onscroll = function () {
+		var scrollPoint = window.scrollY + window.innerHeight;
+
+		if (scrollPoint >= totalScrollHeight) {
+			
+		}
+	}
+
+	function articleCard(props) {
+		return	`<div class="mt-4 rounded pb-2" style="box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);">
 					<div class="d-flex">
 						<img class="mt-4 ms-2" style="width:200px; height:150px;" />
 						<div class="wdt-max-400 ms-3">
