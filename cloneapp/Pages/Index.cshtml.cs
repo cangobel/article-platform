@@ -3,6 +3,7 @@ using cloneapp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace cloneapp.Pages;
 
@@ -29,15 +30,15 @@ public class IndexModel : PageModel
 
 	public void OnGet()
 	{
-		categories = dbContext.Categories.ToList();
+        categories = dbContext.Categories.AsNoTracking().ToList();
 		articleProps = GetArticlePropsList();
 	}
 
-	public IActionResult OnPostCategoryArticles(string category)
+	public IActionResult OnGetCategoryArticles(string category)
 	{
         var list = GetArticlePropsList(category);
 
-		return new JsonResult(new { content = list });
+        return new JsonResult(new { contents = list });
     }
 
 	public List<ArticleProps> GetArticlePropsList()
@@ -52,8 +53,8 @@ public class IndexModel : PageModel
 
 	public IQueryable<ArticleProps> GetArticlePropsQuery()
 	{
-		return dbContext.Articles.Join(dbContext.ArticleCategories, article => article.ArticleId, categories => categories.ArticleId, (article, categories) =>
-				new ArticleProps { ArticleId = article.ArticleId, Title = article.Title!, UserName = article.UserName, Category = categories.CategoryName });
+		return dbContext.Articles.AsNoTracking().Join(dbContext.ArticleCategories, article => article.ArticleId, categories => categories.ArticleId, 
+			(article, categories) => new ArticleProps { ArticleId = article.ArticleId, Title = article.Title!, UserName = article.UserName, Category = categories.CategoryName });
 	}
 
 	public string ArticleLink(int articleId)
