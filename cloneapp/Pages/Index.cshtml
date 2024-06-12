@@ -58,72 +58,9 @@
 	</div>
 </div>
 
-<script>
-	var slide_container = document.getElementById("slide-container");
-	var content_container = document.getElementById("content-container");
-
-	var content_map = new Map();
-	content_map.set('Explore', content_container.innerHTML);
-
-	var totalScrollHeight = document.body.scrollHeight;
-
-	window.onscroll = function () {
-		var scrollPoint = window.scrollY + window.innerHeight;
-
-		if (scrollPoint >= totalScrollHeight) {
-			
-		}
-	}
-
-	function articleCard(props) {
-		return	`<div class="mt-4 rounded pb-2" style="box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);">
-					<div class="d-flex">
-						<img class="mt-4 ms-2" style="width:200px; height:150px;" />
-						<div class="wdt-max-400 ms-3">
-							<a class="dark-link ms-3" href=/GetArticle?articleId=${props.articleId}>
-								<h3 class="m-0">${props.title}</h3>
-							</a>
-							<p class="overflow-hdn dots mt-2">
-								ABCDEFASDFASDFASDFASERFIOAJSDİLKFAEİROFIASDLKCNAİEORADLFVNADSŞLKNMVZEOĞİDRIANDŞLFKVNAŞDSJFGA
-								SDFİALKSFNDİALERFAODFNİVAEİORUADFLJKVN
-							</p>
-						</div>
-					</div>
-					<div class="d-flex flex-row-reverse me-3">
-						<span class="">written by: ${props.userName}</span>
-						<span class="me-3">${props.category}</span>
-					</div>
-				</div>`;
-	}
-
-	var xhr = new XMLHttpRequest();
-	xhr.onloadend = (e) => {
-		var json = JSON.parse(e.target.response);
-		var components = "";
-
-		json.contents.forEach((value) => {
-			components += articleCard(value);
-		});
-
-		content_container.innerHTML = components;
-	}
-	
-	function getCategoryContent(button) {
-
-		if (!content_map.has(button.id)) {
-			ajaxRequest(xhr, 'GET', '/Index?handler=CategoryArticles', { varName: 'category', value: button.id });
-		}
-		else {
-			contents = content_map.get(button.id);
-			content_container.innerHTML = contents;
-		}
-	}
-
-	function prevButtonOnClick() {
-		slide_container.scrollLeft -= 70;
-	}
-
-	function nextButtonOnClick() {
-		slide_container.scrollLeft += 70;
-	}
-</script>
+@section Scripts {
+	<script src="~/js/index/SlideContainer.js"></script>
+	<script src="~/js/index/ScrollEnd.js"></script>
+	<script src="~/js/index/ArticleCard.js"></script>
+	<script src="~/js/index/GetCategoryContent.js"></script>
+}
