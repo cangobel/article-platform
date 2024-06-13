@@ -16,7 +16,7 @@
 	<div class="row">
 		<div class="mt-5" style="position:relative; max-width: 680px;">
 			<div id="slide-container" class="d-flex" style="overflow-x: scroll; scrollbar-width: none;">
-				<button onclick="getCategoryContent(this)" id="Explore" class="styled-button category-button ms-4">Explore</button>
+				<button onclick="getExploreContent()" id="Explore" class="styled-button category-button ms-4">Explore</button>
 				@foreach (var category in Model.categories)
 				{
 					<button onclick="getCategoryContent(this)" id=@category.CategoryName class="styled-button category-button ms-4">@category.CategoryName</button>
@@ -58,9 +58,15 @@
 	</div>
 </div>
 
+<script>
+	function getLastArticleId(){
+		return '@Model.lastArticleId';
+	}
+</script>
+
 @section Scripts {
 	<script src="~/js/index/SlideContainer.js"></script>
 	<script src="~/js/index/ScrollEnd.js"></script>
 	<script src="~/js/index/ArticleCard.js"></script>
-	<script src="~/js/index/GetCategoryContent.js"></script>
+	<script src="~/js/index/GetContent.js"></script>
 }

@@ -22,9 +22,9 @@ function userDropdownButtonClick() {
     }
 }
 
-//only sends one data
 function ajaxRequest(xhr, type, handler, data) {
-    
+    var query = "";
+
     if (type == 'POST') {
         xhr.open(type, handler, true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -32,7 +32,8 @@ function ajaxRequest(xhr, type, handler, data) {
         xhr.send(data.varName + '=' + data.value);
     }
     else {
-        xhr.open(type, handler + '&' + data.varName + '=' + data.value, true);
+        query = '&' + data.varNames[0] + '=' + data.values[0] + '&' + data.varNames[1] + '=' + data.values[1];
+        xhr.open(type, handler + query, true);
         xhr.send();
     }
 }

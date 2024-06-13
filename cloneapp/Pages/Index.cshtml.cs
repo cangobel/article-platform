@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace cloneapp.Pages;
 
 public class IndexModel : PageModel
-{
+{	
 	public class ArticleProps
 	{
 		public int ArticleId { get; set; }
@@ -17,10 +17,14 @@ public class IndexModel : PageModel
 		public string UserName { get; set; }
 	}
 
+	public const int MaxQueryOutput = 5;
+
 	private DataContext dbContext;
 	private UserManager<IdentityUser> userManager;
 	public List<Category> categories;
-	public List<ArticleProps> articleProps;
+	
+	public IEnumerable<ArticleProps> articleProps;
+	public int lastArticleId;
 
 	public IndexModel(DataContext dbContext, UserManager<IdentityUser> userManager)
 	{
@@ -31,30 +35,32 @@ public class IndexModel : PageModel
 	public void OnGet()
 	{
         categories = dbContext.Categories.AsNoTracking().ToList();
-		articleProps = GetArticlePropsList();
+		articleProps = GetArticlePropsArray();
+		lastArticleId = articleProps.Last().ArticleId;
 	}
 
-	public IActionResult OnGetCategoryArticles(string category)
+	public IActionResult OnGetCategoryArticlesProps(string category, int lastArticleId)
 	{
-        var list = GetArticlePropsList(category);
+        var array = GetArticlePropsArray(category, lastArticleId);
 
-        return new JsonResult(new { contents = list });
+		return new JsonResult(new { contents = array, lastArticleId = array.Last().ArticleId });
     }
 
-	public List<ArticleProps> GetArticlePropsList()
+	public IEnumerable<ArticleProps> GetArticlePropsArray()
 	{
-		return GetArticlePropsQuery().ToList();
+		return GetArticlePropsQuery().ToArray().Take(MaxQueryOutput);
 	}
 	
-	public List<ArticleProps> GetArticlePropsList(string category)
+	public IEnumerable<ArticleProps> GetArticlePropsArray(string category, int lastArticleId)
 	{
-		return GetArticlePropsQuery().Where(article => article.Category == category).ToList();
+		return GetArticlePropsQuery(lastArticleId).Where(article => article.Category == category).Take(MaxQueryOutput).ToArray();
 	}
 
-	public IQueryable<ArticleProps> GetArticlePropsQuery()
+	public IQueryable<ArticleProps> GetArticlePropsQuery(int lastArticleId = 0)
 	{
-		return dbContext.Articles.AsNoTracking().Join(dbContext.ArticleCategories, article => article.ArticleId, categories => categories.ArticleId, 
-			(article, categories) => new ArticleProps { ArticleId = article.ArticleId, Title = article.Title!, UserName = article.UserName, Category = categories.CategoryName });
+        return dbContext.Articles.AsNoTracking().Join(dbContext.ArticleCategories, article => article.ArticleId, categories => categories.ArticleId,
+			   (article, categories) => new ArticleProps { ArticleId = article.ArticleId, Title = article.Title!, UserName = article.UserName, Category = categories.CategoryName }).
+			   Where(article => article.ArticleId > lastArticleId);
 	}
 
 	public string ArticleLink(int articleId)
