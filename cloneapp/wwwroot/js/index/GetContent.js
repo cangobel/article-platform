@@ -1,8 +1,8 @@
 class CategoryContent {
-	constructor(components, lastArticleId = 0) {
-		this.components = components;
-		this.lastArticleId = lastArticleId;
-	}
+    constructor(components, lastArticleId = 0) {
+        this.components = components;
+        this.lastArticleId = lastArticleId;
+    }
 }
 
 var content_container = document.getElementById("content-container");
@@ -11,31 +11,67 @@ var content_map = new Map();
 content_map.set('Explore', new CategoryContent(content_container.innerHTML, getLastArticleId()));
 
 var xhr = new XMLHttpRequest();
-var lastClickedCategory = "";
-
-xhr.onloadend = (e) => {
-	var json = JSON.parse(e.target.response);
-	var components = "";
-
-	json.contents.forEach((value) => {
-		components += articleCard(value);
-	});
-
-	content_container.innerHTML = components;
-	content_map.set(lastClickedCategory, new CategoryContent(components, json.lastArticleId));
-}
+var lastClickedCategory = 'Explore';
 
 function getCategoryContent(button) {
-	lastClickedCategory = button.id;
+    lastClickedCategory = button.id;
+    xhr.onloadend = getCategoryContentCallback;
 
-	if (!content_map.has(button.id)) {
-		ajaxRequest(xhr, 'GET', '/Index?handler=CategoryArticlesProps', { varNames: ['category', 'lastArticleId'], values: [button.id, 0] });
-	}
-	else {
-		content_container.innerHTML = content_map.get(button.id).components;
-	}
+    if (!content_map.has(button.id)) {
+        ajaxRequest(xhr, 'GET', '/Index?handler=CategoryArticlesProps', { varNames: ['category', 'lastArticleId'], values: [button.id, 0] });
+    }
+    else {
+        content_container.innerHTML = content_map.get(button.id).components;
+    }
 }
 
-function getExploreContent() {
-	content_container.innerHTML = content_map.get('Explore').components;
+function getCategoryContentScrollEnd() {
+    var lastArticleId = content_map.get(lastClickedCategory).lastArticleId;
+    xhr.onloadend = getContentScrollEndCallback;
+
+    if (lastClickedCategory != 'Explore')
+        ajaxRequest(xhr, 'GET', '/Index?handler=CategoryArticlesProps', { varNames: ['category', 'lastArticleId'], values: [lastClickedCategory, lastArticleId] });
+    else
+        ajaxRequest(xhr, 'GET', '/Index?handler=ExploreArticlesProps', { varNames: ['category', 'lastArticleId'], values: [lastClickedCategory, lastArticleId] });
+}
+
+function getExploreContent(button) {
+    lastClickedCategory = button.id;
+    content_container.innerHTML = content_map.get('Explore').components;
+}
+
+function getCategoryContentCallback(e) {
+    var newCategoryContent = parseResponse(e.target.response);
+
+    if (newCategoryContent != null) {
+        content_container.innerHTML = newCategoryContent.components;
+        content_map.set(lastClickedCategory, newCategoryContent);
+    }
+}
+
+function getContentScrollEndCallback(e) {
+    var newCategoryContent = parseResponse(e.target.response);
+
+    if (newCategoryContent != null) {
+        content_container.innerHTML += newCategoryContent.components;
+
+        var categoryContent = content_map.get(lastClickedCategory);
+        categoryContent.components += newCategoryContent.components;
+        categoryContent.lastArticleId = newCategoryContent.lastArticleId;
+    }
+}
+
+function parseResponse(response) {
+    if (response == 'null') {
+        return null;
+    }
+
+    var json = JSON.parse(response);
+    var newComponents = "";
+
+    json.contents.forEach((value) => {
+        newComponents += articleCard(value);
+    });
+
+    return new CategoryContent(newComponents, json.lastArticleId);
 }
