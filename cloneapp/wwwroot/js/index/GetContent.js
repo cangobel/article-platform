@@ -14,10 +14,11 @@ var xhr = new XMLHttpRequest();
 var lastClickedCategory = 'Explore';
 
 function getCategoryContent(button) {
+    focus(button);
     lastClickedCategory = button.id;
-    xhr.onloadend = getCategoryContentCallback;
 
     if (!content_map.has(button.id)) {
+        xhr.onloadend = getCategoryContentCallback;
         ajaxRequest(xhr, 'GET', '/Index?handler=CategoryArticlesProps', { varNames: ['category', 'lastArticleId'], values: [button.id, 0] });
     }
     else {
@@ -36,6 +37,7 @@ function getCategoryContentScrollEnd() {
 }
 
 function getExploreContent(button) {
+    focus(button);
     lastClickedCategory = button.id;
     content_container.innerHTML = content_map.get('Explore').components;
 }

@@ -14,8 +14,8 @@ button{
     height: 32px;
 }
 
-.category-button:focus {
-    border-bottom: solid 2px;
+.button-fake-focus {
+    border-bottom: solid 2px !important;
 }
 
 .slide-button-p {

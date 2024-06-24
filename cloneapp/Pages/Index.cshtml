@@ -16,7 +16,7 @@
 	<div class="row">
 		<div class="mt-5" style="position:relative; max-width: 680px;">
 			<div id="slide-container" class="d-flex" style="overflow-x: scroll; scrollbar-width: none;">
-				<button onclick="getExploreContent(this)" id="Explore" class="styled-button category-button ms-4">Explore</button>
+				<button onclick="getExploreContent(this);" id="Explore" class="styled-button category-button ms-4">Explore</button>
 				@foreach (var category in Model.categories)
 				{
 					<button onclick="getCategoryContent(this)" id=@category.CategoryName class="styled-button category-button ms-4">@category.CategoryName</button>
@@ -62,6 +62,16 @@
 	function getLastArticleId(){
 		return '@Model.lastArticleId';
 	}
+
+	var focusedButton = document.getElementById('Explore');
+	focusedButton.classList.add('button-fake-focus');
+
+	function focus(button) {
+		focusedButton.classList.remove('button-fake-focus');
+		button.classList.add('button-fake-focus');
+		focusedButton = button;
+	}
+
 </script>
 
 @section Scripts {
