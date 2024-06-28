@@ -180,6 +180,12 @@
 	function SetArticleId(id) {
 		articleId = id;
 	}
+
+	function InputLimitationOnInput(textarea, event) {
+		var character_count = document.getElementById("character-count");
+		character_count.innerText = 50 - textarea.value.length;
+	}
+
 </script>
 
 <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
@@ -214,6 +220,27 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 				<button type="button" class="btn btn-primary" onclick="SendCategories()">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="changeCoverModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="chageCoverLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Change Cover Letter</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body p-0">
+				<textarea id="text-area" oninput="InputLimitationOnInput(this, event)" placeholder="type here..." maxlength="50" style="" class="d-block m-auto"></textarea>
+			</div>
+			<div class="modal-footer">
+				<div class="d-flex me-auto">
+					<span id="character-count" class="d-block" style="width:20px">50</span>
+					<span class="ms-1">characters left</span>
+				</div>
+				<button type="button" class="btn btn-primary" onclick="">Save changes</button>
 			</div>
 		</div>
 	</div>
@@ -258,6 +285,9 @@
 								}
 								<button onclick="SetArticleId(@item.ArticleId)" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#categorySelectModal">
 									Set Categories
+								</button>
+								<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#changeCoverModal">
+									Change Cover Letter
 								</button>
 							</td>
 							<td>
