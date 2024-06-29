@@ -126,6 +126,18 @@
 		return _dataContext.ArticleCategories.Where(articleCategory => articleCategory.ArticleId == article.ArticleId).ToList();
 	}
 
+	[JSInvokableAttribute("SetArticleCoverLetter")]
+	public void SetArticleCoverLetter(object[] bundle)
+	{
+		Console.WriteLine(bundle[1]);
+		int articleId = Convert.ToInt32(bundle[0].ToString());
+		var article = _dataContext.Articles.Where(article => article.ArticleId == articleId).FirstOrDefault();
+		article.CoverLetter = bundle[1].ToString();
+
+		_dataContext.Articles.Update(article);
+		_dataContext.SaveChangesAsync();
+	}
+
 	public string EditArticleLinkText(int articleId)
 	{
 		return "/WriteArticle?articleId=" + articleId;
@@ -186,6 +198,15 @@
 		character_count.innerText = 50 - textarea.value.length;
 	}
 
+	function SendArticleCoverLetter() {
+		var cover_letter = document.getElementById("text-area").value;
+		var bundle = [articleId, cover_letter];
+
+		if (cover_letter != null) {
+			window.dotNetHelper.invokeMethodAsync("SetArticleCoverLetter", bundle);
+		}
+	}
+
 </script>
 
 <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
@@ -240,7 +261,7 @@
 					<span id="character-count" class="d-block" style="width:20px">50</span>
 					<span class="ms-1">characters left</span>
 				</div>
-				<button type="button" class="btn btn-primary" onclick="">Save changes</button>
+				<button type="button" class="btn btn-primary" onclick="SendArticleCoverLetter()">Save changes</button>
 			</div>
 		</div>
 	</div>
@@ -286,7 +307,7 @@
 								<button onclick="SetArticleId(@item.ArticleId)" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#categorySelectModal">
 									Set Categories
 								</button>
-								<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#changeCoverModal">
+								<button onclick="SetArticleId(@item.ArticleId)" type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#changeCoverModal">
 									Change Cover Letter
 								</button>
 							</td>

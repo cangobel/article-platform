@@ -12,6 +12,9 @@ public class Article
 	[Column("UserName")]
 	public string UserName { get; set; }
 
+	[Column("CoverLetter")]
+	public string? CoverLetter { get; set; }
+
 	[Column("Title")]
 	public string? Title { get; set; }
 
